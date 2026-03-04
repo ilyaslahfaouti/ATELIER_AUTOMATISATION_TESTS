@@ -23,20 +23,23 @@ def get_db():
 
 
 def init_db():
-    conn = get_db()
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS test_results (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp     TEXT    NOT NULL,
-            test_name     TEXT    NOT NULL,
-            status        TEXT    NOT NULL,
-            response_time REAL,
-            status_code   INTEGER,
-            message       TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    try:
+        conn = get_db()
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS test_results (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp     TEXT    NOT NULL,
+                test_name     TEXT    NOT NULL,
+                status        TEXT    NOT NULL,
+                response_time REAL,
+                status_code   INTEGER,
+                message       TEXT
+            )
+        ''')
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        app.logger.error(f"init_db error: {e}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -176,19 +179,21 @@ def run_all_tests():
         _execute_test(name, fn)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PLANIFICATEUR  (toutes les 5 minutes)
-# ─────────────────────────────────────────────────────────────────────────────
-scheduler = BackgroundScheduler(daemon=True)
-scheduler.add_job(
-    func=run_all_tests,
-    trigger="interval",
-    minutes=5,
-    id="api_monitor",
-    next_run_time=datetime.now() + timedelta(seconds=10)   # 1er run 10 s après démarrage
-)
-scheduler.start()
-atexit.register(lambda: scheduler.shutdown(wait=False))
+# PLANIFICATEUR (toutes les 5 minutes)
+# Demarre uniquement si pas deja actif (evite les conflits WSGI multi-worker)
+try:
+    scheduler = BackgroundScheduler(daemon=True)
+    scheduler.add_job(
+        func=run_all_tests,
+        trigger="interval",
+        minutes=5,
+        id="api_monitor",
+        next_run_time=datetime.now() + timedelta(seconds=15)
+    )
+    scheduler.start()
+    atexit.register(lambda: scheduler.shutdown(wait=False))
+except Exception as e:
+    app.logger.error(f"Scheduler error: {e}")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -265,10 +270,9 @@ def api_metrics():
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # INITIALISATION
-# ─────────────────────────────────────────────────────────────────────────────
-init_db()
+with app.app_context():
+    init_db()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)
