@@ -161,12 +161,12 @@ def t_content_type():
 
 # Registre de tous les tests
 ALL_TESTS = [
-    ("✅ Statut HTTP 200",                t_status_200),
-    ("⏱️ Temps réponse < 2 000 ms",       t_response_time),
-    ("📦 Champs JSON requis présents",     t_champs_requis),
-    ("🌡️ Température dans plage réelle",  t_temperature),
-    ("🗺️ Endpoint Géocodage",             t_geocoding),
-    ("📄 Content-Type application/json",  t_content_type),
+    ("Statut HTTP 200",                t_status_200),
+    ("Temps réponse < 2 000 ms",       t_response_time),
+    ("Champs JSON requis présents",     t_champs_requis),
+    ("Température dans plage réelle",  t_temperature),
+    ("Endpoint Géocodage",             t_geocoding),
+    ("Content-Type application/json",  t_content_type),
 ]
 
 
@@ -271,4 +271,4 @@ def api_metrics():
 init_db()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5002, debug=True)

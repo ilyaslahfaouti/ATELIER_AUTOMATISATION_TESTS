@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>API Monitoring — Open-Meteo</title>
+  <title>API Monitoring - Open-Meteo</title>
   <style>
     :root {
       --bg:     #0b1020;
@@ -204,15 +204,15 @@
 
 <header>
   <div>
-    <h1>🔭 API Monitoring Dashboard</h1>
-    <div class="sub">Open-Meteo · Tests automatisés · Métriques QoS · Exécution toutes les 5 min</div>
+    <h1>API Monitoring Dashboard</h1>
+    <div class="sub">Open-Meteo — Tests automatisés — Métriques QoS — Exécution toutes les 5 min</div>
   </div>
   <div class="ts" id="last-run-badge" style="padding-top:4px">Chargement…</div>
 </header>
 
 <nav class="nav">
-  <a href="/">📋 Consignes</a>
-  <a href="/monitoring" class="active">📊 Dashboard</a>
+  <a href="/">Consignes</a>
+  <a href="/monitoring" class="active">Dashboard</a>
 </nav>
 
 <div class="container">
@@ -245,14 +245,14 @@
   <!-- ── CONTROLS ── -->
   <div class="controls">
     <button class="btn-run" id="btn-run" onclick="runTests()">
-      ▶ Lancer les tests maintenant
+      Lancer les tests maintenant
     </button>
     <span class="refresh-info" id="refresh-info">Actualisation auto toutes les 30 s</span>
   </div>
 
   <!-- ── PER-TEST SUMMARY ── -->
   <div class="card">
-    <h2>📋 Résumé par test</h2>
+    <h2>Résumé par test</h2>
     <div class="tbl-wrap">
       <table>
         <thead>
@@ -273,7 +273,7 @@
 
   <!-- ── RECENT RESULTS ── -->
   <div class="card">
-    <h2>📜 50 derniers résultats</h2>
+    <h2>50 derniers résultats</h2>
     <div class="tbl-wrap">
       <table>
         <thead>
@@ -311,7 +311,7 @@ async function loadMetrics() {
     const m = await fetch('/api/metrics').then(r => r.json());
 
     document.getElementById('last-run-badge').textContent =
-      m.last_run ? '🕐 Dernier run : ' + m.last_run : 'Aucun run pour l\'instant';
+      m.last_run ? 'Dernier run : ' + m.last_run : 'Aucun run pour le moment';
 
     const avail = m.availability ?? 0;
     const elAvail = document.getElementById('kpi-avail');
@@ -393,17 +393,17 @@ async function runTests() {
   const btn = document.getElementById('btn-run');
   const inf = document.getElementById('refresh-info');
   btn.disabled     = true;
-  btn.innerHTML    = '<span class="spinner"></span>Tests en cours…';
-  inf.textContent  = 'Exécution des 6 tests…';
+  btn.innerHTML    = '<span class="spinner"></span> Tests en cours...';
+  inf.textContent  = 'Exécution des 6 tests...';
   try {
     const res = await fetch('/run-tests', { method: 'POST' }).then(r => r.json());
     await refreshAll();
-    inf.textContent = '✅ ' + res.message;
+    inf.textContent = res.message;
   } catch (e) {
-    inf.textContent = '❌ Erreur : ' + e.message;
+    inf.textContent = 'Erreur : ' + e.message;
   } finally {
     btn.disabled  = false;
-    btn.innerHTML = '▶ Lancer les tests maintenant';
+    btn.innerHTML = 'Lancer les tests maintenant';
     setTimeout(() => {
       if (inf.textContent.startsWith('✅') || inf.textContent.startsWith('❌'))
         inf.textContent = 'Actualisation auto toutes les 30 s';
