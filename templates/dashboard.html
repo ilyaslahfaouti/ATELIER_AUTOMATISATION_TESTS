@@ -3,267 +3,325 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>API Monitoring - Open-Meteo</title>
+  <title>API Monitor — Open-Meteo</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg:       #000000;
-      --surface:  #1c1c1e;
-      --surface2: #2c2c2e;
-      --surface3: #3a3a3c;
-      --text:     #ffffff;
-      --muted:    #8e8e93;
-      --orange:   #ff9f0a;
-      --blue:     #0a84ff;
-      --ok:       #30d158;
-      --bad:      #ff453a;
-      --warn:     #ff9f0a;
-      --line:     #3a3a3c;
+      --bg:       #0d0d0d;
+      --surface:  #141414;
+      --surface2: #1e1e1e;
+      --border:   #2a2a2a;
+      --text:     #f0f0f0;
+      --muted:    #666;
+      --cyan:     #00d4aa;
+      --purple:   #a855f7;
+      --red:      #f43f5e;
+      --yellow:   #fbbf24;
+      --green:    #00d4aa;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      font-family: "Inter", -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.5;
       min-height: 100vh;
+      font-size: 14px;
     }
 
-    /* HEADER */
-    header {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 36px 24px 20px;
+    /* TOP BAR */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-      border-bottom: 1px solid var(--line);
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    header h1 {
-      font-size: clamp(20px, 2.8vw, 30px);
+    .topbar-left { display: flex; align-items: center; gap: 24px; }
+    .logo {
+      font-size: 15px;
       font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-    header .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
-    .last-run {
-      font-size: 12px;
-      color: var(--muted);
-      background: var(--surface2);
-      padding: 6px 14px;
-      border-radius: 20px;
-      white-space: nowrap;
-      align-self: center;
-    }
-
-    /* NAV */
-    nav {
-      max-width: 1100px;
-      margin: 16px auto 0;
-      padding: 0 24px;
+      color: var(--cyan);
+      letter-spacing: -.3px;
       display: flex;
+      align-items: center;
       gap: 8px;
     }
-    nav a {
+    .logo-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+    .topbar-nav { display: flex; gap: 4px; }
+    .topbar-nav a {
       text-decoration: none;
       font-size: 13px;
-      font-weight: 500;
-      padding: 7px 18px;
-      border-radius: 8px;
-      background: var(--surface2);
+      padding: 6px 14px;
+      border-radius: 6px;
       color: var(--muted);
-      transition: background .15s, color .15s;
+      transition: all .15s;
     }
-    nav a.active, nav a:hover { background: var(--orange); color: #000; }
-
-    /* CONTAINER */
-    .container { max-width: 1100px; margin: 0 auto; padding: 24px 24px 60px; }
-
-    /* KPI GRID */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 12px;
-      margin-bottom: 24px;
+    .topbar-nav a.active { background: rgba(0,212,170,.1); color: var(--cyan); }
+    .topbar-nav a:hover  { color: var(--text); background: var(--surface2); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .status-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+      background: var(--surface2);
+      padding: 5px 12px; border-radius: 20px;
+      border: 1px solid var(--border);
     }
-    .kpi {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 22px 18px;
-      text-align: center;
-    }
-    .kpi .val { font-size: 36px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
-    .kpi .lbl { color: var(--muted); font-size: 11px; margin-top: 6px; text-transform: uppercase; letter-spacing: .06em; }
-    .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
-
-    .c-orange { color: var(--orange); }
-    .c-blue   { color: var(--blue);   }
-    .c-green  { color: var(--ok);     }
-    .c-red    { color: var(--bad);    }
-    .c-grey   { color: var(--muted);  }
-
-    /* CONTROLS */
-    .controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan); }
     .btn-run {
-      background: var(--orange);
+      background: var(--cyan);
       color: #000;
       border: none;
-      border-radius: 10px;
-      padding: 11px 24px;
+      border-radius: 8px;
+      padding: 8px 18px;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       transition: opacity .2s;
+      display: flex; align-items: center; gap: 6px;
     }
     .btn-run:hover    { opacity: .85; }
     .btn-run:disabled { opacity: .4; cursor: not-allowed; }
-    .refresh-info { font-size: 13px; color: var(--muted); }
 
-    /* CARD */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 22px;
+    /* MAIN */
+    .main { max-width: 1280px; margin: 0 auto; padding: 24px 28px 60px; }
+
+    /* KPI ROW */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
       margin-bottom: 20px;
     }
-    .card h2 {
+    @media (max-width: 900px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    .kpi {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--kpi-color, var(--cyan));
+    }
+    .kpi .val {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: var(--kpi-color, var(--cyan));
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .kpi .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* CHARTS GRID */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 1100px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 700px)  { .charts-grid { grid-template-columns: 1fr; } }
+
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .chart-card h3 {
       font-size: 11px;
       font-weight: 600;
-      color: var(--orange);
-      margin-bottom: 16px;
+      color: var(--muted);
       text-transform: uppercase;
       letter-spacing: .1em;
+      margin-bottom: 16px;
     }
+    .chart-card.wide { grid-column: span 2; }
+    @media (max-width: 1100px) { .chart-card.wide { grid-column: span 1; } }
+    .chart-wrap { position: relative; height: 180px; }
 
-    /* TABLE */
+    /* TABLES */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .table-card h3 {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     .tbl-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th {
       color: var(--muted);
       text-align: left;
-      padding: 8px 14px;
-      border-bottom: 1px solid var(--line);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: .08em;
+      letter-spacing: .06em;
       white-space: nowrap;
     }
     td {
-      padding: 11px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      padding: 11px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.03);
       vertical-align: middle;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover td      { background: var(--surface2); }
+    tr:hover td { background: rgba(255,255,255,.02); }
 
     /* BADGES */
     .badge {
       display: inline-block;
-      padding: 3px 10px;
-      border-radius: 6px;
+      padding: 3px 9px;
+      border-radius: 5px;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: .06em;
+      letter-spacing: .05em;
     }
-    .badge-PASS  { background: rgba(48,209,88,.15);  color: var(--ok);   }
-    .badge-FAIL  { background: rgba(255,69,58,.15);  color: var(--bad);  }
-    .badge-ERROR { background: rgba(255,159,10,.15); color: var(--warn); }
+    .badge-PASS  { background: rgba(0,212,170,.12);  color: var(--cyan);   }
+    .badge-FAIL  { background: rgba(244,63,94,.12);  color: var(--red);    }
+    .badge-ERROR { background: rgba(251,191,36,.12); color: var(--yellow); }
 
     /* PROGRESS BAR */
-    .pbar-wrap {
-      width: 80px; background: var(--surface3);
-      border-radius: 4px; height: 5px;
-      display: inline-block; vertical-align: middle; margin-right: 8px;
-    }
-    .pbar { height: 100%; border-radius: 4px; transition: width .5s; }
+    .pbar-wrap { width: 80px; background: var(--surface2); border-radius: 3px; height: 4px; display: inline-block; vertical-align: middle; margin-right: 8px; }
+    .pbar { height: 100%; border-radius: 3px; transition: width .5s; }
 
     /* SPINNER */
     .spinner {
-      display: inline-block;
-      width: 12px; height: 12px;
+      display: inline-block; width: 12px; height: 12px;
       border: 2px solid rgba(0,0,0,.2);
       border-top-color: #000;
       border-radius: 50%;
       animation: spin .6s linear infinite;
       vertical-align: middle;
-      margin-right: 6px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .ts   { font-size: 11px; color: var(--muted); white-space: nowrap; }
-    .msg  { font-size: 12px; color: var(--muted); max-width: 260px;
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .empty{ color: var(--muted); padding: 20px 14px; font-size: 13px; }
-
-    @media (max-width: 640px) {
-      .kpi .val { font-size: 26px; }
-      td, th    { padding: 7px 8px; }
-    }
+    .msg  { font-size: 12px; color: var(--muted); max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .empty{ color: var(--muted); padding: 20px 12px; font-size: 13px; }
+    .rt   { font-weight: 600; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>API Monitoring</h1>
-    <div class="sub">Open-Meteo &mdash; Tests automatises &mdash; Execution toutes les 5 min</div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      API Monitor
+    </div>
+    <nav class="topbar-nav">
+      <a href="/">Consignes</a>
+      <a href="/monitoring" class="active">Dashboard</a>
+    </nav>
   </div>
-  <div class="last-run" id="last-run-badge">Chargement...</div>
-</header>
+  <div class="topbar-right">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="last-run-badge">Chargement...</span>
+    </div>
+    <button class="btn-run" id="btn-run" onclick="runTests()">
+      Lancer les tests
+    </button>
+  </div>
+</div>
 
-<nav>
-  <a href="/">Consignes</a>
-  <a href="/monitoring" class="active">Dashboard</a>
-</nav>
+<div class="main">
 
-<div class="container">
-
-  <!-- KPI -->
-  <div class="kpi-grid">
-    <div class="kpi">
-      <div class="val c-orange" id="kpi-avail">--</div>
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi" style="--kpi-color: var(--cyan)">
+      <div class="val" id="kpi-avail">--</div>
       <div class="lbl">Disponibilite</div>
     </div>
-    <div class="kpi">
-      <div class="val c-green" id="kpi-passed">--</div>
+    <div class="kpi" style="--kpi-color: var(--cyan)">
+      <div class="val" id="kpi-passed">--</div>
       <div class="lbl">Tests reussis</div>
     </div>
-    <div class="kpi">
-      <div class="val c-red" id="kpi-failed">--</div>
+    <div class="kpi" style="--kpi-color: var(--red)">
+      <div class="val" id="kpi-failed">--</div>
       <div class="lbl">Echecs</div>
     </div>
-    <div class="kpi">
-      <div class="val c-grey" id="kpi-total">--</div>
-      <div class="lbl">Total</div>
+    <div class="kpi" style="--kpi-color: var(--purple)">
+      <div class="val" id="kpi-total">--</div>
+      <div class="lbl">Total runs</div>
     </div>
-    <div class="kpi">
-      <div class="val c-blue" id="kpi-avgrt">--</div>
-      <div class="lbl">Temps moyen (ms)</div>
+    <div class="kpi" style="--kpi-color: var(--yellow)">
+      <div class="val" id="kpi-avgrt">--</div>
+      <div class="lbl">Temps moyen</div>
       <div class="sub" id="kpi-minmax"></div>
     </div>
   </div>
 
-  <!-- CONTROLS -->
-  <div class="controls">
-    <button class="btn-run" id="btn-run" onclick="runTests()">Lancer les tests</button>
-    <span class="refresh-info" id="refresh-info">Actualisation auto toutes les 30 s</span>
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3>Disponibilite globale</h3>
+      <div class="chart-wrap">
+        <canvas id="chartDonut"></canvas>
+      </div>
+    </div>
+    <div class="chart-card wide">
+      <h3>Temps de reponse (ms) — historique</h3>
+      <div class="chart-wrap">
+        <canvas id="chartLine"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Taux de reussite par test</h3>
+      <div class="chart-wrap">
+        <canvas id="chartBar"></canvas>
+      </div>
+    </div>
   </div>
 
-  <!-- RESUME PAR TEST -->
-  <div class="card">
-    <h2>Resume par test</h2>
+  <!-- TABLE RESUME -->
+  <div class="table-card">
+    <h3>Resume par test</h3>
     <div class="tbl-wrap">
       <table>
         <thead>
           <tr>
             <th>Test</th>
-            <th>Executions</th>
+            <th>Runs</th>
             <th>Taux de reussite</th>
-            <th>Temps moyen (ms)</th>
+            <th>Temps moyen</th>
             <th>Dernier statut</th>
           </tr>
         </thead>
@@ -274,9 +332,12 @@
     </div>
   </div>
 
-  <!-- HISTORIQUE -->
-  <div class="card">
-    <h2>50 derniers resultats</h2>
+  <!-- TABLE HISTORIQUE -->
+  <div class="table-card">
+    <h3>
+      <span>Historique des 50 derniers resultats</span>
+      <span id="refresh-info" style="font-size:11px; font-weight:400; color:var(--muted)"></span>
+    </h3>
     <div class="tbl-wrap">
       <table>
         <thead>
@@ -284,7 +345,7 @@
             <th>Horodatage (UTC)</th>
             <th>Test</th>
             <th>Statut</th>
-            <th>Code HTTP</th>
+            <th>HTTP</th>
             <th>Temps (ms)</th>
             <th>Message</th>
           </tr>
@@ -299,57 +360,177 @@
 </div>
 
 <script>
+// ── Instances Chart.js ──
+let donutChart, lineChart, barChart;
+
+const CYAN   = '#00d4aa';
+const PURPLE = '#a855f7';
+const RED    = '#f43f5e';
+const YELLOW = '#fbbf24';
+const MUTED  = '#2a2a2a';
+const TEXT   = '#666';
+
 function rtColor(ms) {
-  if (ms === null || ms === undefined) return 'var(--text)';
-  return ms < 500 ? 'var(--ok)' : ms < 1500 ? 'var(--warn)' : 'var(--bad)';
-}
-function availColor(pct) {
-  return pct >= 95 ? 'c-green' : pct >= 80 ? 'c-orange' : 'c-red';
+  if (!ms && ms !== 0) return TEXT;
+  return ms < 500 ? CYAN : ms < 1500 ? YELLOW : RED;
 }
 
+// ── DONUT disponibilite ──
+function initDonut() {
+  donutChart = new Chart(document.getElementById('chartDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['PASS', 'FAIL / ERROR'],
+      datasets: [{
+        data: [0, 100],
+        backgroundColor: [CYAN, '#1e1e1e'],
+        borderColor: ['#0d0d0d'],
+        borderWidth: 3,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      cutout: '75%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ' ' + ctx.label + ' : ' + ctx.parsed + '%' }
+        }
+      },
+      animation: { animateRotate: true, duration: 800 }
+    },
+    plugins: [{
+      id: 'centerText',
+      afterDraw(chart) {
+        const { ctx, chartArea: { top, bottom, left, right } } = chart;
+        const cx = (left + right) / 2, cy = (top + bottom) / 2;
+        const val = chart.data.datasets[0].data[0];
+        ctx.save();
+        ctx.font = 'bold 28px Inter, sans-serif';
+        ctx.fillStyle = CYAN;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(val + '%', cx, cy - 8);
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillStyle = TEXT;
+        ctx.fillText('disponibilite', cx, cy + 16);
+        ctx.restore();
+      }
+    }]
+  });
+}
+
+// ── LINE temps de reponse ──
+function initLine() {
+  lineChart = new Chart(document.getElementById('chartLine'), {
+    type: 'line',
+    data: { labels: [], datasets: [{
+      label: 'Temps (ms)',
+      data: [],
+      borderColor: CYAN,
+      backgroundColor: 'rgba(0,212,170,.06)',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: CYAN,
+      tension: 0.4,
+      fill: true
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: TEXT, maxTicksLimit: 8, maxRotation: 0 }, grid: { color: MUTED } },
+        y: { ticks: { color: TEXT }, grid: { color: MUTED },
+             title: { display: true, text: 'ms', color: TEXT, font: { size: 11 } } }
+      }
+    }
+  });
+}
+
+// ── BAR taux reussite par test ──
+function initBar() {
+  barChart = new Chart(document.getElementById('chartBar'), {
+    type: 'bar',
+    data: { labels: [], datasets: [{
+      label: 'Taux (%)',
+      data: [],
+      backgroundColor: [],
+      borderRadius: 6,
+      borderSkipped: false
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: TEXT, font: { size: 10 }, maxRotation: 30 }, grid: { display: false } },
+        y: { min: 0, max: 100, ticks: { color: TEXT, callback: v => v + '%' }, grid: { color: MUTED } }
+      }
+    }
+  });
+}
+
+// ── Chargement metrics + update charts ──
 async function loadMetrics() {
   try {
     const m = await fetch('/api/metrics').then(r => r.json());
+
     document.getElementById('last-run-badge').textContent =
-      m.last_run ? 'Dernier run : ' + m.last_run : 'Aucun run';
+      m.last_run ? m.last_run.replace('T',' ').replace('Z','') + ' UTC' : 'Aucun run';
+
     const avail = m.availability ?? 0;
-    const elAvail = document.getElementById('kpi-avail');
-    elAvail.textContent = avail + ' %';
-    elAvail.className   = 'val ' + availColor(avail);
+    document.getElementById('kpi-avail').textContent  = avail + ' %';
+    document.getElementById('kpi-avail').style.color  = avail >= 95 ? CYAN : avail >= 80 ? YELLOW : RED;
     document.getElementById('kpi-passed').textContent = m.passed ?? '0';
     document.getElementById('kpi-failed').textContent = (m.failed ?? 0) + (m.errors ?? 0);
     document.getElementById('kpi-total').textContent  = m.total ?? '0';
-    const elRt = document.getElementById('kpi-avgrt');
-    elRt.textContent = m.avg_rt ? m.avg_rt + ' ms' : '--';
-    elRt.style.color = rtColor(m.avg_rt);
+
+    const rt = m.avg_rt;
+    document.getElementById('kpi-avgrt').textContent = rt ? rt + ' ms' : '--';
+    document.getElementById('kpi-avgrt').style.color = rtColor(rt);
     document.getElementById('kpi-minmax').textContent =
-      (m.min_rt && m.max_rt) ? 'min ' + m.min_rt + '  max ' + m.max_rt + ' ms' : '';
+      (m.min_rt && m.max_rt) ? 'min ' + m.min_rt + ' / max ' + m.max_rt + ' ms' : '';
+
+    // DONUT
+    const fail = 100 - avail;
+    donutChart.data.datasets[0].data = [avail, fail > 0 ? fail : 0];
+    donutChart.data.datasets[0].backgroundColor = [CYAN, avail === 100 ? '#1e1e1e' : '#2a0d13'];
+    donutChart.update();
+
+    // BAR
+    const tests = m.per_test || [];
+    barChart.data.labels = tests.map(t => t.test_name.replace('application/json','CT:json').replace('< 2 000 ms','<2000ms').replace('dans plage réelle','temp').replace('requis présents','champs'));
+    barChart.data.datasets[0].data = tests.map(t => t.total > 0 ? Math.round(t.passed / t.total * 100) : 0);
+    barChart.data.datasets[0].backgroundColor = tests.map(t => {
+      const pct = t.total > 0 ? t.passed / t.total * 100 : 0;
+      return pct >= 95 ? 'rgba(0,212,170,.7)' : pct >= 80 ? 'rgba(251,191,36,.7)' : 'rgba(244,63,94,.7)';
+    });
+    barChart.update();
+
+    // TABLE resume
     const tbody = document.getElementById('tbody-pertest');
     tbody.innerHTML = '';
-    const tests = m.per_test || [];
     if (!tests.length) {
-      tbody.innerHTML = '<tr><td class="empty" colspan="5">Aucun resultat</td></tr>';
-      return;
+      tbody.innerHTML = '<tr><td class="empty" colspan="5">Aucun resultat</td></tr>'; return;
     }
     tests.forEach(t => {
       const pct   = t.total > 0 ? Math.round(t.passed / t.total * 100) : 0;
-      const color = pct >= 95 ? 'var(--ok)' : pct >= 80 ? 'var(--warn)' : 'var(--bad)';
+      const color = pct >= 95 ? CYAN : pct >= 80 ? YELLOW : RED;
       const avgMs = t.avg_rt ? Math.round(t.avg_rt) : null;
-      tbody.innerHTML += `
-        <tr>
-          <td>${t.test_name}</td>
-          <td>${t.total}</td>
-          <td>
-            <div class="pbar-wrap"><div class="pbar" style="width:${pct}%; background:${color}"></div></div>
-            <span style="color:${color}; font-weight:700">${pct} %</span>
-          </td>
-          <td style="color:${rtColor(avgMs)}">${avgMs !== null ? avgMs + ' ms' : '--'}</td>
-          <td><span class="badge badge-${t.last_status}">${t.last_status}</span></td>
-        </tr>`;
+      tbody.innerHTML += `<tr>
+        <td>${t.test_name}</td>
+        <td>${t.total}</td>
+        <td>
+          <div class="pbar-wrap"><div class="pbar" style="width:${pct}%;background:${color}"></div></div>
+          <span style="color:${color};font-weight:700">${pct} %</span>
+        </td>
+        <td class="rt" style="color:${rtColor(avgMs)}">${avgMs !== null ? avgMs + ' ms' : '--'}</td>
+        <td><span class="badge badge-${t.last_status}">${t.last_status}</span></td>
+      </tr>`;
     });
-  } catch (e) { console.error(e); }
+  } catch(e) { console.error(e); }
 }
 
+// ── Chargement resultats + update line chart ──
 async function loadResults() {
   try {
     const rows = await fetch('/api/results?limit=50').then(r => r.json());
@@ -359,49 +540,59 @@ async function loadResults() {
       tbody.innerHTML = '<tr><td class="empty" colspan="6">Aucun resultat</td></tr>';
       return;
     }
+
+    // LINE CHART — 30 derniers points (PASS seulement)
+    const lineData = rows.filter(r => r.response_time !== null).slice(0, 30).reverse();
+    lineChart.data.labels   = lineData.map(r => r.timestamp.slice(11,19));
+    lineChart.data.datasets[0].data = lineData.map(r => r.response_time);
+    lineChart.data.datasets[0].pointBackgroundColor = lineData.map(r => rtColor(r.response_time));
+    lineChart.update();
+
     rows.forEach(r => {
-      tbody.innerHTML += `
-        <tr>
-          <td class="ts">${r.timestamp}</td>
-          <td>${r.test_name}</td>
-          <td><span class="badge badge-${r.status}">${r.status}</span></td>
-          <td>${r.status_code ?? '--'}</td>
-          <td style="color:${rtColor(r.response_time)}; font-weight:600">${r.response_time !== null ? r.response_time + ' ms' : '--'}</td>
-          <td class="msg" title="${r.message ?? ''}">${r.message ?? ''}</td>
-        </tr>`;
+      tbody.innerHTML += `<tr>
+        <td class="ts">${r.timestamp}</td>
+        <td>${r.test_name}</td>
+        <td><span class="badge badge-${r.status}">${r.status}</span></td>
+        <td>${r.status_code ?? '--'}</td>
+        <td class="rt" style="color:${rtColor(r.response_time)}">${r.response_time !== null ? r.response_time + ' ms' : '--'}</td>
+        <td class="msg" title="${r.message ?? ''}">${r.message ?? ''}</td>
+      </tr>`;
     });
-  } catch (e) { console.error(e); }
+  } catch(e) { console.error(e); }
 }
 
+// ── Run manuel ──
 async function runTests() {
   const btn = document.getElementById('btn-run');
   const inf = document.getElementById('refresh-info');
-  btn.disabled    = true;
-  btn.innerHTML   = '<span class="spinner"></span> En cours...';
-  inf.textContent = 'Execution des 6 tests...';
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span> En cours...';
   try {
     const res = await fetch('/run-tests', { method: 'POST' }).then(r => r.json());
     await refreshAll();
     inf.textContent = res.message;
-  } catch (e) {
-    inf.textContent = 'Erreur : ' + e.message;
-  } finally {
+  } catch(e) { inf.textContent = 'Erreur : ' + e.message; }
+  finally {
     btn.disabled  = false;
     btn.innerHTML = 'Lancer les tests';
-    setTimeout(() => { inf.textContent = 'Actualisation auto toutes les 30 s'; }, 5000);
+    setTimeout(() => { inf.textContent = ''; }, 5000);
   }
 }
 
 async function refreshAll() { await Promise.all([loadMetrics(), loadResults()]); }
+
+// ── Init ──
+initDonut(); initLine(); initBar();
 refreshAll();
 
-let countdown = 30;
+// Auto-refresh 30s
+let cd = 30;
 setInterval(() => {
-  countdown--;
-  if (countdown <= 0) { countdown = 30; refreshAll(); }
+  cd--;
+  if (cd <= 0) { cd = 30; refreshAll(); }
   const inf = document.getElementById('refresh-info');
-  if (inf.textContent.startsWith('Actualisation'))
-    inf.textContent = 'Actualisation dans ' + countdown + ' s';
+  if (!inf.textContent || inf.textContent.includes('s)'))
+    inf.textContent = 'Actualisation dans ' + cd + ' s';
 }, 1000);
 </script>
 </body>
