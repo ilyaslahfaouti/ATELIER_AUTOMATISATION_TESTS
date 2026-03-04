@@ -6,181 +6,187 @@
   <title>API Monitoring - Open-Meteo</title>
   <style>
     :root {
-      --bg:     #0b1020;
-      --card:   #121a33;
-      --muted:  #aab4d4;
-      --text:   #e9edff;
-      --accent: #77baff;
-      --ok:     #62d6a0;
-      --warn:   #ffcc66;
-      --bad:    #ff6b7a;
-      --line:   #23305c;
+      --bg:       #000000;
+      --surface:  #1c1c1e;
+      --surface2: #2c2c2e;
+      --surface3: #3a3a3c;
+      --text:     #ffffff;
+      --muted:    #8e8e93;
+      --orange:   #ff9f0a;
+      --blue:     #0a84ff;
+      --ok:       #30d158;
+      --bad:      #ff453a;
+      --warn:     #ff9f0a;
+      --line:     #3a3a3c;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 10% 0%, #172257 0%, var(--bg) 60%);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
       color: var(--text);
       line-height: 1.5;
       min-height: 100vh;
     }
 
-    /* ── HEADER ── */
+    /* HEADER */
     header {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 32px 20px 0;
+      padding: 36px 24px 20px;
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
-    }
-    header h1  { font-size: clamp(20px, 3vw, 32px); font-weight: 700; }
-    header .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
-
-    /* ── NAV ── */
-    .nav {
-      max-width: 1200px;
-      margin: 18px auto 0;
-      padding: 0 20px;
-      display: flex;
       gap: 10px;
+      border-bottom: 1px solid var(--line);
     }
-    .nav a {
-      color: var(--accent);
+    header h1 {
+      font-size: clamp(20px, 2.8vw, 30px);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    header .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .last-run {
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface2);
+      padding: 6px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+      align-self: center;
+    }
+
+    /* NAV */
+    nav {
+      max-width: 1100px;
+      margin: 16px auto 0;
+      padding: 0 24px;
+      display: flex;
+      gap: 8px;
+    }
+    nav a {
       text-decoration: none;
       font-size: 13px;
-      padding: 6px 16px;
-      border: 1px solid rgba(119,186,255,0.4);
-      border-radius: 20px;
-      transition: background .2s;
+      font-weight: 500;
+      padding: 7px 18px;
+      border-radius: 8px;
+      background: var(--surface2);
+      color: var(--muted);
+      transition: background .15s, color .15s;
     }
-    .nav a:hover, .nav a.active { background: rgba(119,186,255,0.12); }
+    nav a.active, nav a:hover { background: var(--orange); color: #000; }
 
-    /* ── MAIN ── */
-    .container { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+    /* CONTAINER */
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 24px 60px; }
 
-    /* ── KPI CARDS ── */
+    /* KPI GRID */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
       margin-bottom: 24px;
     }
     .kpi {
-      background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-      border: 1px solid rgba(255,255,255,0.09);
+      background: var(--surface);
+      border: 1px solid var(--line);
       border-radius: 14px;
       padding: 22px 18px;
       text-align: center;
     }
-    .kpi .val { font-size: 38px; font-weight: 700; line-height: 1.1; }
-    .kpi .lbl { color: var(--muted); font-size: 13px; margin-top: 6px; }
-    .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 4px; opacity: .8; }
+    .kpi .val { font-size: 36px; font-weight: 700; letter-spacing: -1px; line-height: 1.1; }
+    .kpi .lbl { color: var(--muted); font-size: 11px; margin-top: 6px; text-transform: uppercase; letter-spacing: .06em; }
+    .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
+    .c-orange { color: var(--orange); }
+    .c-blue   { color: var(--blue);   }
     .c-green  { color: var(--ok);     }
-    .c-yellow { color: var(--warn);   }
     .c-red    { color: var(--bad);    }
-    .c-blue   { color: var(--accent); }
-    .c-white  { color: var(--text);   }
+    .c-grey   { color: var(--muted);  }
 
-    /* ── CONTROLS ── */
-    .controls {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
+    /* CONTROLS */
+    .controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 24px; }
     .btn-run {
-      background: var(--accent);
-      color: #0a1020;
+      background: var(--orange);
+      color: #000;
       border: none;
-      border-radius: 8px;
-      padding: 10px 22px;
+      border-radius: 10px;
+      padding: 11px 24px;
       font-weight: 700;
       font-size: 14px;
       cursor: pointer;
       transition: opacity .2s;
     }
     .btn-run:hover    { opacity: .85; }
-    .btn-run:disabled { opacity: .45; cursor: not-allowed; }
-    .refresh-info { color: var(--muted); font-size: 13px; }
+    .btn-run:disabled { opacity: .4; cursor: not-allowed; }
+    .refresh-info { font-size: 13px; color: var(--muted); }
 
-    /* ── CARDS ── */
+    /* CARD */
     .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
       padding: 22px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
     .card h2 {
-      font-size: 16px;
+      font-size: 11px;
       font-weight: 600;
-      color: var(--accent);
+      color: var(--orange);
       margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
     }
 
-    /* ── TABLES ── */
+    /* TABLE */
     .tbl-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th {
       color: var(--muted);
       text-align: left;
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-bottom: 1px solid var(--line);
-      font-weight: 600;
       font-size: 11px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: .06em;
+      letter-spacing: .08em;
       white-space: nowrap;
     }
     td {
-      padding: 10px 12px;
+      padding: 11px 14px;
       border-bottom: 1px solid rgba(255,255,255,0.04);
       vertical-align: middle;
     }
     tr:last-child td { border-bottom: none; }
-    tr:hover td      { background: rgba(255,255,255,0.025); }
+    tr:hover td      { background: var(--surface2); }
 
-    /* ── BADGES ── */
+    /* BADGES */
     .badge {
       display: inline-block;
       padding: 3px 10px;
-      border-radius: 20px;
+      border-radius: 6px;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .06em;
-      white-space: nowrap;
     }
-    .badge-PASS  { background: rgba(98,214,160,.12);  color: var(--ok);     border: 1px solid rgba(98,214,160,.3);  }
-    .badge-FAIL  { background: rgba(255,107,122,.12); color: var(--bad);    border: 1px solid rgba(255,107,122,.3); }
-    .badge-ERROR { background: rgba(255,204,102,.12); color: var(--warn);   border: 1px solid rgba(255,204,102,.3); }
+    .badge-PASS  { background: rgba(48,209,88,.15);  color: var(--ok);   }
+    .badge-FAIL  { background: rgba(255,69,58,.15);  color: var(--bad);  }
+    .badge-ERROR { background: rgba(255,159,10,.15); color: var(--warn); }
 
-    /* ── PROGRESS BAR ── */
+    /* PROGRESS BAR */
     .pbar-wrap {
-      width: 90px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 4px;
-      height: 6px;
-      display: inline-block;
-      vertical-align: middle;
-      margin-right: 8px;
+      width: 80px; background: var(--surface3);
+      border-radius: 4px; height: 5px;
+      display: inline-block; vertical-align: middle; margin-right: 8px;
     }
     .pbar { height: 100%; border-radius: 4px; transition: width .5s; }
 
-    /* ── SPINNER ── */
+    /* SPINNER */
     .spinner {
       display: inline-block;
-      width: 13px; height: 13px;
-      border: 2px solid rgba(10,16,32,.3);
-      border-top-color: #0a1020;
+      width: 12px; height: 12px;
+      border: 2px solid rgba(0,0,0,.2);
+      border-top-color: #000;
       border-radius: 50%;
       animation: spin .6s linear infinite;
       vertical-align: middle;
@@ -188,14 +194,13 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── MISC ── */
     .ts   { font-size: 11px; color: var(--muted); white-space: nowrap; }
-    .msg  { font-size: 12px; color: var(--muted); max-width: 280px;
+    .msg  { font-size: 12px; color: var(--muted); max-width: 260px;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .empty{ color: var(--muted); padding: 20px 12px; font-size: 13px; }
+    .empty{ color: var(--muted); padding: 20px 14px; font-size: 13px; }
 
-    @media (max-width: 680px) {
-      .kpi .val { font-size: 28px; }
+    @media (max-width: 640px) {
+      .kpi .val { font-size: 26px; }
       td, th    { padding: 7px 8px; }
     }
   </style>
@@ -204,76 +209,74 @@
 
 <header>
   <div>
-    <h1>API Monitoring Dashboard</h1>
-    <div class="sub">Open-Meteo — Tests automatisés — Métriques QoS — Exécution toutes les 5 min</div>
+    <h1>API Monitoring</h1>
+    <div class="sub">Open-Meteo &mdash; Tests automatises &mdash; Execution toutes les 5 min</div>
   </div>
-  <div class="ts" id="last-run-badge" style="padding-top:4px">Chargement…</div>
+  <div class="last-run" id="last-run-badge">Chargement...</div>
 </header>
 
-<nav class="nav">
+<nav>
   <a href="/">Consignes</a>
   <a href="/monitoring" class="active">Dashboard</a>
 </nav>
 
 <div class="container">
 
-  <!-- ── KPI CARDS ── -->
+  <!-- KPI -->
   <div class="kpi-grid">
     <div class="kpi">
-      <div class="val c-blue"  id="kpi-avail">—</div>
-      <div class="lbl">Disponibilité</div>
+      <div class="val c-orange" id="kpi-avail">--</div>
+      <div class="lbl">Disponibilite</div>
     </div>
     <div class="kpi">
-      <div class="val c-green" id="kpi-passed">—</div>
-      <div class="lbl">Tests réussis</div>
+      <div class="val c-green" id="kpi-passed">--</div>
+      <div class="lbl">Tests reussis</div>
     </div>
     <div class="kpi">
-      <div class="val c-red"   id="kpi-failed">—</div>
-      <div class="lbl">Échecs + Erreurs</div>
+      <div class="val c-red" id="kpi-failed">--</div>
+      <div class="lbl">Echecs</div>
     </div>
     <div class="kpi">
-      <div class="val c-white" id="kpi-total">—</div>
-      <div class="lbl">Total exécutions</div>
+      <div class="val c-grey" id="kpi-total">--</div>
+      <div class="lbl">Total</div>
     </div>
     <div class="kpi">
-      <div class="val"         id="kpi-avgrt">—</div>
-      <div class="lbl">Temps moy. (ms)</div>
-      <div class="sub"         id="kpi-minmax"></div>
+      <div class="val c-blue" id="kpi-avgrt">--</div>
+      <div class="lbl">Temps moyen (ms)</div>
+      <div class="sub" id="kpi-minmax"></div>
     </div>
   </div>
 
-  <!-- ── CONTROLS ── -->
+  <!-- CONTROLS -->
   <div class="controls">
-    <button class="btn-run" id="btn-run" onclick="runTests()">
-      Lancer les tests maintenant
-    </button>
+    <button class="btn-run" id="btn-run" onclick="runTests()">Lancer les tests</button>
     <span class="refresh-info" id="refresh-info">Actualisation auto toutes les 30 s</span>
   </div>
 
-  <!-- ── PER-TEST SUMMARY ── -->
+  <!-- RESUME PAR TEST -->
   <div class="card">
-    <h2>Résumé par test</h2>
+    <h2>Resume par test</h2>
     <div class="tbl-wrap">
       <table>
         <thead>
           <tr>
             <th>Test</th>
-            <th>Exécutions</th>
-            <th>Taux de réussite</th>
-            <th>Temps moy. (ms)</th>
+            <th>Executions</th>
+            <th>Taux de reussite</th>
+            <th>Temps moyen (ms)</th>
             <th>Dernier statut</th>
           </tr>
         </thead>
         <tbody id="tbody-pertest">
-          <tr><td class="empty" colspan="5">Chargement…</td></tr>
+          <tr><td class="empty" colspan="5">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- ── RECENT RESULTS ── -->
+  <!-- HISTORIQUE -->
   <div class="card">
-    <h2>50 derniers résultats</h2>
+    <h2>50 derniers resultats</h2>
     <div class="tbl-wrap">
       <table>
         <thead>
@@ -287,54 +290,45 @@
           </tr>
         </thead>
         <tbody id="tbody-results">
-          <tr><td class="empty" colspan="6">Chargement…</td></tr>
+          <tr><td class="empty" colspan="6">Chargement...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-</div><!-- /container -->
+</div>
 
 <script>
-/* ── Helpers ── */
 function rtColor(ms) {
   if (ms === null || ms === undefined) return 'var(--text)';
   return ms < 500 ? 'var(--ok)' : ms < 1500 ? 'var(--warn)' : 'var(--bad)';
 }
 function availColor(pct) {
-  return pct >= 95 ? 'c-green' : pct >= 80 ? 'c-yellow' : 'c-red';
+  return pct >= 95 ? 'c-green' : pct >= 80 ? 'c-orange' : 'c-red';
 }
 
-/* ── Charge les métriques QoS ── */
 async function loadMetrics() {
   try {
     const m = await fetch('/api/metrics').then(r => r.json());
-
     document.getElementById('last-run-badge').textContent =
-      m.last_run ? 'Dernier run : ' + m.last_run : 'Aucun run pour le moment';
-
+      m.last_run ? 'Dernier run : ' + m.last_run : 'Aucun run';
     const avail = m.availability ?? 0;
     const elAvail = document.getElementById('kpi-avail');
     elAvail.textContent = avail + ' %';
     elAvail.className   = 'val ' + availColor(avail);
-
     document.getElementById('kpi-passed').textContent = m.passed ?? '0';
-    document.getElementById('kpi-failed').textContent = ((m.failed ?? 0) + (m.errors ?? 0));
+    document.getElementById('kpi-failed').textContent = (m.failed ?? 0) + (m.errors ?? 0);
     document.getElementById('kpi-total').textContent  = m.total ?? '0';
-
     const elRt = document.getElementById('kpi-avgrt');
-    elRt.textContent = m.avg_rt ? m.avg_rt + ' ms' : '—';
+    elRt.textContent = m.avg_rt ? m.avg_rt + ' ms' : '--';
     elRt.style.color = rtColor(m.avg_rt);
-
     document.getElementById('kpi-minmax').textContent =
-      (m.min_rt && m.max_rt) ? `min ${m.min_rt} · max ${m.max_rt} ms` : '';
-
-    /* Tableau résumé par test */
+      (m.min_rt && m.max_rt) ? 'min ' + m.min_rt + '  max ' + m.max_rt + ' ms' : '';
     const tbody = document.getElementById('tbody-pertest');
     tbody.innerHTML = '';
     const tests = m.per_test || [];
     if (!tests.length) {
-      tbody.innerHTML = '<tr><td class="empty" colspan="5">Aucun résultat enregistré</td></tr>';
+      tbody.innerHTML = '<tr><td class="empty" colspan="5">Aucun resultat</td></tr>';
       return;
     }
     tests.forEach(t => {
@@ -346,28 +340,23 @@ async function loadMetrics() {
           <td>${t.test_name}</td>
           <td>${t.total}</td>
           <td>
-            <div class="pbar-wrap">
-              <div class="pbar" style="width:${pct}%; background:${color}"></div>
-            </div>
+            <div class="pbar-wrap"><div class="pbar" style="width:${pct}%; background:${color}"></div></div>
             <span style="color:${color}; font-weight:700">${pct} %</span>
           </td>
-          <td style="color:${rtColor(avgMs)}">${avgMs !== null ? avgMs + ' ms' : '—'}</td>
+          <td style="color:${rtColor(avgMs)}">${avgMs !== null ? avgMs + ' ms' : '--'}</td>
           <td><span class="badge badge-${t.last_status}">${t.last_status}</span></td>
         </tr>`;
     });
-  } catch (e) {
-    console.error('loadMetrics error:', e);
-  }
+  } catch (e) { console.error(e); }
 }
 
-/* ── Charge les derniers résultats ── */
 async function loadResults() {
   try {
     const rows = await fetch('/api/results?limit=50').then(r => r.json());
     const tbody = document.getElementById('tbody-results');
     tbody.innerHTML = '';
     if (!rows.length) {
-      tbody.innerHTML = '<tr><td class="empty" colspan="6">Aucun résultat</td></tr>';
+      tbody.innerHTML = '<tr><td class="empty" colspan="6">Aucun resultat</td></tr>';
       return;
     }
     rows.forEach(r => {
@@ -376,25 +365,20 @@ async function loadResults() {
           <td class="ts">${r.timestamp}</td>
           <td>${r.test_name}</td>
           <td><span class="badge badge-${r.status}">${r.status}</span></td>
-          <td>${r.status_code ?? '—'}</td>
-          <td style="color:${rtColor(r.response_time)}; font-weight:600">
-            ${r.response_time !== null ? r.response_time + ' ms' : '—'}
-          </td>
+          <td>${r.status_code ?? '--'}</td>
+          <td style="color:${rtColor(r.response_time)}; font-weight:600">${r.response_time !== null ? r.response_time + ' ms' : '--'}</td>
           <td class="msg" title="${r.message ?? ''}">${r.message ?? ''}</td>
         </tr>`;
     });
-  } catch (e) {
-    console.error('loadResults error:', e);
-  }
+  } catch (e) { console.error(e); }
 }
 
-/* ── Déclenche les tests manuellement ── */
 async function runTests() {
   const btn = document.getElementById('btn-run');
   const inf = document.getElementById('refresh-info');
-  btn.disabled     = true;
-  btn.innerHTML    = '<span class="spinner"></span> Tests en cours...';
-  inf.textContent  = 'Exécution des 6 tests...';
+  btn.disabled    = true;
+  btn.innerHTML   = '<span class="spinner"></span> En cours...';
+  inf.textContent = 'Execution des 6 tests...';
   try {
     const res = await fetch('/run-tests', { method: 'POST' }).then(r => r.json());
     await refreshAll();
@@ -403,34 +387,21 @@ async function runTests() {
     inf.textContent = 'Erreur : ' + e.message;
   } finally {
     btn.disabled  = false;
-    btn.innerHTML = 'Lancer les tests maintenant';
-    setTimeout(() => {
-      if (inf.textContent.startsWith('✅') || inf.textContent.startsWith('❌'))
-        inf.textContent = 'Actualisation auto toutes les 30 s';
-    }, 5000);
+    btn.innerHTML = 'Lancer les tests';
+    setTimeout(() => { inf.textContent = 'Actualisation auto toutes les 30 s'; }, 5000);
   }
 }
 
-/* ── Rafraîchit tout ── */
-async function refreshAll() {
-  await Promise.all([loadMetrics(), loadResults()]);
-}
-
-/* ── Chargement initial ── */
+async function refreshAll() { await Promise.all([loadMetrics(), loadResults()]); }
 refreshAll();
 
-/* ── Compte à rebours + auto-refresh 30 s ── */
 let countdown = 30;
 setInterval(() => {
   countdown--;
-  if (countdown <= 0) {
-    countdown = 30;
-    refreshAll();
-  }
+  if (countdown <= 0) { countdown = 30; refreshAll(); }
   const inf = document.getElementById('refresh-info');
-  if (inf.textContent.startsWith('Actualisation')) {
-    inf.textContent = `Actualisation auto dans ${countdown} s`;
-  }
+  if (inf.textContent.startsWith('Actualisation'))
+    inf.textContent = 'Actualisation dans ' + countdown + ' s';
 }, 1000);
 </script>
 </body>
