@@ -52,6 +52,7 @@ PARIS_PARAMS  = {
     "longitude": 2.3522,
     "current_weather": "true"
 }
+TIMEOUT = 20  # secondes — augmenté car PythonAnywhere peut être lent
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -91,7 +92,7 @@ def _execute_test(name, fn):
 # ─────────────────────────────────────────────────────────────────────────────
 def t_status_200():
     """Vérifie que l'API répond avec HTTP 200."""
-    r = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=10)
+    r = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=TIMEOUT)
     return {
         "ok": r.status_code == 200,
         "status_code": r.status_code,
@@ -102,18 +103,18 @@ def t_status_200():
 def t_response_time():
     """Vérifie que le temps de réponse est inférieur à 2 000 ms."""
     t0 = time.time()
-    r  = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=10)
+    r  = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=TIMEOUT)
     ms = (time.time() - t0) * 1000
     return {
         "ok": ms < 2000,
         "status_code": r.status_code,
-        "message": f"{round(ms, 1)} ms (seuil : 2 000 ms)"
+        "message": f"{round(ms, 1)} ms (seuil : 2 000 ms — timeout : {TIMEOUT}s)"
     }
 
 
 def t_champs_requis():
     """Vérifie la présence des champs JSON obligatoires dans la réponse."""
-    r       = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=10)
+    r       = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=TIMEOUT)
     data    = r.json()
     missing = [f for f in ["current_weather", "latitude", "longitude"]
                if f not in data]
@@ -127,7 +128,7 @@ def t_champs_requis():
 
 def t_temperature():
     """Vérifie que la température retournée est dans une plage réaliste."""
-    r    = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=10)
+    r    = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=TIMEOUT)
     temp = r.json()["current_weather"]["temperature"]
     ok   = -90 <= temp <= 60
     return {
@@ -141,7 +142,7 @@ def t_geocoding():
     """Vérifie que l'endpoint de géocodage répond correctement."""
     r  = requests.get(GEOCODING_URL,
                       params={"name": "Paris", "count": 1, "language": "fr"},
-                      timeout=10)
+                      timeout=TIMEOUT)
     ok = r.status_code == 200 and "results" in r.json()
     return {
         "ok": ok,
@@ -152,7 +153,7 @@ def t_geocoding():
 
 def t_content_type():
     """Vérifie que le Content-Type de la réponse est application/json."""
-    r  = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=10)
+    r  = requests.get(FORECAST_URL, params=PARIS_PARAMS, timeout=TIMEOUT)
     ct = r.headers.get("Content-Type", "")
     ok = "application/json" in ct
     return {
